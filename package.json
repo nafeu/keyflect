@@ -1,0 +1,28 @@
+{
+  "name": "keyflect",
+  "version": "0.1.0",
+  "description": "global key input overlay for livestreaming",
+  "main": "index.js",
+  "scripts": {
+    "dev:client": "snowpack dev",
+    "dev:server": "nodemon server",
+    "build": "snowpack build"
+  },
+  "keywords": [
+    "socket",
+    "chatrooms",
+    "realtime"
+  ],
+  "author": "Nafeu Nasir (nafeu.nasir@gmail.com)",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "http2-proxy": "^5.0.53",
+    "node-global-key-listener": "^0.1.1",
+    "socket.io": "^4.5.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20",
+    "snowpack": "^3.8.8"
+  }
+}
