@@ -5,10 +5,6 @@ import socket from './socket.jsx';
 
 import './index.css';
 
-const Keycap = ({ name }) => (
-  <div className="keycap">{name}</div>
-)
-
 const getActiveKeysByMapping = mapping => Object.entries(mapping)
   .filter(entry => {
     const [key, value] = entry;
@@ -18,21 +14,25 @@ const getActiveKeysByMapping = mapping => Object.entries(mapping)
   .map(entry => {
     const [key, value] = entry;
 
-    return { name: key };
+    return key;
   })
 
 const App = () => {
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [activeKeyMapping, setActiveKeyMapping] = useState({});
+  const [lastKeyPressed, setLastKeyPressed] = useState(null);
   const [app, setApp] = useState(null);
 
   const handleSocketConnect = () => {
     setIsConnected(true);
   }
 
-  const handleKeyEvent = ({ activeKeyMapping, app }) => {
+  const handleKeyEvent = ({ activeKeyMapping, app, lastKey }) => {
     setApp(app);
     setActiveKeyMapping(activeKeyMapping);
+    if (lastKey.isDown) {
+      setLastKeyPressed(lastKey.name)
+    }
   }
 
   const handleSocketDisconnect = () => {}
@@ -55,11 +55,16 @@ const App = () => {
 
   if (isConnected) {
     return (
-      <div>
-        <div className="app">{app}</div>
+      <div className="app-container">
+        <div className="hotkey-history"></div>
         <div className="keycaps">
-          {activeKeys.map(({ name }) => <Keycap name={name} />)}
+          <div className={`keycap ${activeKeyMapping['LEFT SHIFT'] && 'down'}`}>SHIFT</div>
+          <div className={`keycap ${activeKeyMapping['LEFT CTRL'] && 'down'}`}>CTRL</div>
+          <div className={`keycap ${activeKeyMapping['LEFT ALT'] && 'down'}`}>ALT</div>
+          <div className={`keycap ${activeKeyMapping['LEFT META'] && 'down'}`}>CMD</div>
+          <div className="keycap last-key-pressed">{lastKeyPressed || '-'}</div>
         </div>
+        <div className="app-container">{app || '---'} | github.com/nafeu/dotfiles</div>
       </div>
     );
   }

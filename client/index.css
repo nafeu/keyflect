@@ -2,6 +2,16 @@
   font-size: 1.5em;
 }
 
+.keycaps {
+  display: flex;
+  gap: 10px;
+}
+
 .keycap {
   font-size: 2em;
+}
+
+.down {
+  color: white;
+  background-color: black;
 }

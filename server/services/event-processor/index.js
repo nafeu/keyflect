@@ -1,4 +1,4 @@
-const handleKeyEvent = ({
+const processKeyEvent = ({
   io,
   event: { name, state },
   app,
@@ -6,8 +6,10 @@ const handleKeyEvent = ({
   activeKeyMapping
 }) => {
   const payload = {
-    name,
-    isDown: state === 'DOWN',
+    lastKey: {
+      name,
+      isDown: state === 'DOWN'
+    },
     app,
     timestamp,
     activeKeyMapping
@@ -16,4 +18,4 @@ const handleKeyEvent = ({
   io.emit('KEY_EVENT', payload);
 }
 
-module.exports = { handleKeyEvent };
+module.exports = { processKeyEvent };
