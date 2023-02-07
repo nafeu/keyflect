@@ -3,16 +3,36 @@ import ReactDOM from 'https://cdn.skypack.dev/react-dom';
 
 import socket from './socket.jsx';
 
+import './index.css';
+
+const Keycap = ({ name }) => (
+  <div className="keycap">{name}</div>
+)
+
+const getActiveKeysByMapping = mapping => Object.entries(mapping)
+  .filter(entry => {
+    const [key, value] = entry;
+
+    return value;
+  })
+  .map(entry => {
+    const [key, value] = entry;
+
+    return { name: key };
+  })
+
 const App = () => {
   const [isConnected, setIsConnected] = useState(socket.connected);
-  const [key, setKey] = useState('');
+  const [activeKeyMapping, setActiveKeyMapping] = useState({});
+  const [app, setApp] = useState(null);
 
   const handleSocketConnect = () => {
     setIsConnected(true);
   }
 
-  const handleKeyEvent = keyEvent => {
-    setKey(JSON.stringify(keyEvent, null, 2));
+  const handleKeyEvent = ({ activeKeyMapping, app }) => {
+    setApp(app);
+    setActiveKeyMapping(activeKeyMapping);
   }
 
   const handleSocketDisconnect = () => {}
@@ -31,9 +51,16 @@ const App = () => {
     };
   }, []);
 
+  const activeKeys = getActiveKeysByMapping(activeKeyMapping);
+
   if (isConnected) {
     return (
-      <pre>{key}</pre>
+      <div>
+        <div className="app">{app}</div>
+        <div className="keycaps">
+          {activeKeys.map(({ name }) => <Keycap name={name} />)}
+        </div>
+      </div>
     );
   }
 

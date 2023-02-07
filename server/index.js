@@ -3,6 +3,7 @@ const http = require('http');
 const cors = require('cors');
 const { GlobalKeyboardListener } = require('node-global-key-listener');
 const activeWindow = require('active-win');
+const { handleKeyEvent } = require('./services/event-processor');
 
 const app = express();
 const server = http.Server(app);
@@ -29,15 +30,17 @@ io.on('connection', (socket) => {
   });
 });
 
-globalKeyboardListener.addListener(event => {
-  const keyEvent = {
-    name: event.name,
-    state: event.state,
+globalKeyboardListener.addListener((event, activeKeyMapping) => {
+  handleKeyEvent({
+    io,
+    event: {
+      name: event.name,
+      state: event.state
+    },
     app: activeWindow.sync().owner.name,
-    timestamp: Date.now()
-  }
-
-  io.emit('KEY_EVENT', keyEvent);
+    timestamp: Date.now(),
+    activeKeyMapping
+  })
 });
 
 server.listen(process.env.PORT || 8000, () => {
