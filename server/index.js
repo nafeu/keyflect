@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const { GlobalKeyboardListener } = require('node-global-key-listener');
+const activeWindow = require('active-win');
 
 const app = express();
 const server = http.Server(app);
@@ -28,8 +29,15 @@ io.on('connection', (socket) => {
   });
 });
 
-globalKeyboardListener.addListener(function (e, down) {
-  io.emit('key-event', `${e.name} ${e.state == "DOWN" ? "DOWN" : "UP  "}`);
+globalKeyboardListener.addListener(event => {
+  const keyEvent = {
+    name: event.name,
+    state: event.state,
+    app: activeWindow.sync().owner.name,
+    timestamp: Date.now()
+  }
+
+  io.emit('KEY_EVENT', keyEvent);
 });
 
 server.listen(process.env.PORT || 8000, () => {

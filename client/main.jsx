@@ -11,8 +11,8 @@ const App = () => {
     setIsConnected(true);
   }
 
-  const handleKeyEvent = keyEventInfo => {
-    setKey(keyEventInfo);
+  const handleKeyEvent = keyEvent => {
+    setKey(JSON.stringify(keyEvent, null, 2));
   }
 
   const handleSocketDisconnect = () => {}
@@ -20,18 +20,20 @@ const App = () => {
   useEffect(() => {
     socket.on('connect', handleSocketConnect);
     socket.on('disconnect', handleSocketDisconnect);
-    socket.on('key-event', handleKeyEvent);
+
+    socket.on('KEY_EVENT', handleKeyEvent);
 
     return () => {
       socket.off('connect');
       socket.off('disconnect');
-      socket.off('key-event');
+
+      socket.off('KEY_EVENT');
     };
   }, []);
 
   if (isConnected) {
     return (
-      <h1>{key}</h1>
+      <pre>{key}</pre>
     );
   }
 
