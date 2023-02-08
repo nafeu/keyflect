@@ -1,9 +1,20 @@
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
+const yaml = require('js-yaml');
+const fs = require('fs');
 const { GlobalKeyboardListener } = require('node-global-key-listener');
 const activeWindow = require('active-win');
 const { processKeyEvent } = require('./services/event-processor');
+
+let config;
+
+try {
+  config = yaml.load(fs.readFileSync('config.yml', 'utf8'));
+  console.log(config);
+} catch (error) {
+  console.log(error);
+}
 
 const app = express();
 const server = http.Server(app);
@@ -38,7 +49,8 @@ const handleKeyEvent = (event, activeKeyMapping) => processKeyEvent({
   },
   app: activeWindow.sync().owner.name,
   timestamp: Date.now(),
-  activeKeyMapping
+  activeKeyMapping,
+  config
 });
 
 globalKeyboardListener.addListener(handleKeyEvent);

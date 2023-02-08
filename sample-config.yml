@@ -1,0 +1,9 @@
+---
+- app: Sublime Text
+  hotkeys:
+    - keys: [LEFT META, LEFT SHIFT, D]
+      desc: Duplicate Line
+    - keys: [LEFT META, D]
+      desc: Duplicate Selection
+    - keys: [LEFT META, Z]
+      desc: Undo
