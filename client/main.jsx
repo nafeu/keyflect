@@ -28,18 +28,18 @@ const App = () => {
     setIsConnected(true);
   }
 
-  const handleKeyEvent = ({ activeKeyMapping, app, lastKey }) => {
+  const handleKeyEvent = ({ activeKeyMapping, app, lastKey: { isDown, isModifier, displayName } }) => {
     setApp(app);
     setActiveKeyMapping(activeKeyMapping);
-    if (lastKey.isDown) {
-      setLastKeyPressed(lastKey.name)
+    if (isDown && !isModifier) {
+      setLastKeyPressed(displayName)
     }
   }
 
   const handleCombinationEvent = ({ keys, desc }) => {
     setHotkeyHistory(currentHotkeyHistory => {
       const isRepeatHotkey = currentHotkeyHistory.length > 0
-        && currentHotkeyHistory[0].keys.sort().join() === keys.sort().join()
+        && currentHotkeyHistory[0].keys === keys
 
       if (isRepeatHotkey) {
         const [firstHistoryItem, ...restOfHistory] = currentHotkeyHistory;
@@ -89,7 +89,7 @@ const App = () => {
         <pre className="hotkey-history">
           {hotkeyHistory.map(({ keys, desc, count }) => (
             <div className="hotkey">
-              {keys.join(' + ')} : {desc} ({count})
+              {keys} : {desc} ({count})
             </div>
           ))}
         </pre>

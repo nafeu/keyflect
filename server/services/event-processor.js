@@ -1,3 +1,20 @@
+const { acceptedNameToMacKeycodeMapping, modifierKeyIds } = require('../utils/keycode-lookup');
+
+const isEqualCombination = ({ inputKeys, activeKeys }) => {
+  const serializedInputKeys = inputKeys
+    .split('+')
+    .map(acceptedName => acceptedNameToMacKeycodeMapping[acceptedName.toLowerCase()])
+    .sort()
+    .join('+')
+
+  const serializedActiveKeys = activeKeys
+    .map(acceptedName => acceptedNameToMacKeycodeMapping[acceptedName.toLowerCase()])
+    .sort()
+    .join('+')
+
+  return serializedInputKeys === serializedActiveKeys;
+}
+
 const getKeyCombination = ({ activeKeyMapping, app: currentApp, name, isDown, config, timestamp }) => {
   if (!isDown) return;
 
@@ -6,8 +23,13 @@ const getKeyCombination = ({ activeKeyMapping, app: currentApp, name, isDown, co
   if (!matchedAppHotkeys) return;
 
   const activeKeys = Object.keys(activeKeyMapping).filter(key => activeKeyMapping[key]);
+
+  const moreThanOneKeyPressed = activeKeys.length > 1;
+
+  if (!moreThanOneKeyPressed) return;
+
   const matchedKeyCombination = matchedAppHotkeys.hotkeys.find(
-    ({ keys }) => keys.sort().join() === activeKeys.sort().join()
+    ({ keys }) => isEqualCombination({ inputKeys: keys, activeKeys })
   );
 
   if (!matchedKeyCombination) return;
@@ -17,7 +39,11 @@ const getKeyCombination = ({ activeKeyMapping, app: currentApp, name, isDown, co
 
 const processKeyEvent = ({
   io,
-  event: { name, state },
+  event: {
+    displayName,
+    name,
+    state
+  },
   app,
   timestamp,
   activeKeyMapping,
@@ -28,11 +54,13 @@ const processKeyEvent = ({
   const payload = {
     lastKey: {
       name,
-      isDown
+      isDown,
+      isModifier: modifierKeyIds.includes(name),
+      displayName
     },
     app,
     timestamp,
-    activeKeyMapping
+    activeKeyMapping,
   }
 
   io.emit('KEY_EVENT', payload);

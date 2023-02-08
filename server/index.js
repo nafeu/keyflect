@@ -6,14 +6,15 @@ const fs = require('fs');
 const { GlobalKeyboardListener } = require('node-global-key-listener');
 const activeWindow = require('active-win');
 const { processKeyEvent } = require('./services/event-processor');
+const { macKeycodeToDisplayNameMapping } = require('./utils/keycode-lookup');
 
 let config;
 
 try {
   config = yaml.load(fs.readFileSync('config.yml', 'utf8'));
-  console.log(config);
 } catch (error) {
-  console.log(error);
+  console.log(`[ error ] missing config.yml, run 'cp sample-config.yml config.yml'`);
+  process.exit(1);
 }
 
 const app = express();
@@ -44,7 +45,8 @@ io.on('connection', (socket) => {
 const handleKeyEvent = (event, activeKeyMapping) => processKeyEvent({
   io,
   event: {
-    name: event.name,
+    name: event.rawKey._nameRaw,
+    displayName: macKeycodeToDisplayNameMapping[event.rawKey._nameRaw] || event.name,
     state: event.state
   },
   app: activeWindow.sync().owner.name,
