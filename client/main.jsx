@@ -22,6 +22,7 @@ const App = () => {
   const [activeKeyMapping, setActiveKeyMapping] = useState({});
   const [lastKeyPressed, setLastKeyPressed] = useState(null);
   const [hotkeyHistory, setHotkeyHistory] = useState([]);
+  const [stats, setStats] = useState({});
   const [app, setApp] = useState(null);
 
   const handleSocketConnect = () => {
@@ -63,6 +64,10 @@ const App = () => {
     })
   }
 
+  const handleStatsTick = ({ inputsPerMinute, hotkeysPerMinute, eventCounterTicks }) => {
+    setStats({ inputsPerMinute, hotkeysPerMinute });
+  }
+
   const handleSocketDisconnect = () => {}
 
   useEffect(() => {
@@ -71,6 +76,7 @@ const App = () => {
 
     socket.on('KEY_EVENT', handleKeyEvent);
     socket.on('COMBINATION_EVENT', handleCombinationEvent);
+    socket.on('STATS_TICK', handleStatsTick);
 
     return () => {
       socket.off('connect');
@@ -78,6 +84,7 @@ const App = () => {
 
       socket.off('KEY_EVENT');
       socket.off('COMBINATION_EVENT');
+      socket.off('STATS_TICK');
     };
   }, []);
 
@@ -93,7 +100,7 @@ const App = () => {
             </div>
           ))}
         </pre>
-        <div className="stats"></div>
+        <pre className="stats">{JSON.stringify(stats, null, 2)}</pre>
         <div className="keycaps">
           <div className={`keycap ${activeKeyMapping['LEFT SHIFT'] && 'down'}`}>SHIFT</div>
           <div className={`keycap ${activeKeyMapping['LEFT CTRL'] && 'down'}`}>CTRL</div>

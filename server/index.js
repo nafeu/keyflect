@@ -42,18 +42,45 @@ io.on('connection', (socket) => {
   });
 });
 
-const handleKeyEvent = (event, activeKeyMapping) => processKeyEvent({
-  io,
-  event: {
-    name: event.rawKey._nameRaw,
-    displayName: macKeycodeToDisplayNameMapping[event.rawKey._nameRaw] || event.name,
-    state: event.state
-  },
-  app: activeWindow.sync().owner.name,
-  timestamp: Date.now(),
-  activeKeyMapping,
-  config
-});
+const ONE_SECOND_MS = 1000;
+const TICK_RATE_MS = ONE_SECOND_MS;
+const TICK_INTERVAL_SIZE_S = 10;
+
+const defaultTickData = { actionsCount: 0, hotkeysCount: 0 };
+let eventCounterTicks = [...Array(TICK_INTERVAL_SIZE_S).fill({ ...defaultTickData })];
+
+setInterval(() => {
+  eventCounterTicks = [{ ...defaultTickData }, ...eventCounterTicks.slice(0, -1)];
+
+  const { actionsSum, hotkeysSum } = eventCounterTicks
+    .reduce((sum, { actionsCount, hotkeysCount }) => {
+      sum['actionsSum'] += actionsCount;
+      sum['hotkeysSum'] += hotkeysCount;
+      return sum;
+    }, { actionsSum: 0, hotkeysSum: 0 });
+
+  // TODO: Figure out how to calculate IPS and HKPS
+  const inputsPerMinute = Math.round((actionsSum / TICK_INTERVAL_SIZE_S) * 60);
+  const hotkeysPerMinute = Math.round((hotkeysSum / TICK_INTERVAL_SIZE_S) * 60);
+
+  io.emit('STATS_TICK', { eventCounterTicks, inputsPerMinute, hotkeysPerMinute })
+}, TICK_RATE_MS)
+
+const handleKeyEvent = (event, activeKeyMapping) => {
+  processKeyEvent({
+    io,
+    event: {
+      name: event.rawKey._nameRaw,
+      displayName: macKeycodeToDisplayNameMapping[event.rawKey._nameRaw] || event.name,
+      state: event.state
+    },
+    app: activeWindow.sync().owner.name,
+    timestamp: Date.now(),
+    activeKeyMapping,
+    config,
+    eventCounterTicks
+  })
+};
 
 globalKeyboardListener.addListener(handleKeyEvent);
 

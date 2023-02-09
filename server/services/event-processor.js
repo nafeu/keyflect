@@ -47,7 +47,8 @@ const processKeyEvent = ({
   app,
   timestamp,
   activeKeyMapping,
-  config
+  config,
+  eventCounterTicks
 }) => {
   const isDown = state === 'DOWN';
 
@@ -63,6 +64,7 @@ const processKeyEvent = ({
     activeKeyMapping,
   }
 
+  eventCounterTicks[0].actionsCount += 1;
   io.emit('KEY_EVENT', payload);
 
   const keyCombination = getKeyCombination({
@@ -75,6 +77,7 @@ const processKeyEvent = ({
   });
 
   if (keyCombination) {
+    eventCounterTicks[0].hotkeysCount += 1;
     io.emit('COMBINATION_EVENT', keyCombination)
   }
 }

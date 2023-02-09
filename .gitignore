@@ -3,3 +3,4 @@ devnotes.txt
 build/
 project.todo
 config.yml
+.DS_Store
