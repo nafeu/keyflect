@@ -45,28 +45,34 @@ io.on('connection', (socket) => {
 const ONE_SECOND_MS = 1000;
 const TICK_RATE_MS = ONE_SECOND_MS;
 const TICK_INTERVAL_SIZE_S = 10;
+const FIRST_THREE_ITEMS = 3;
 
-const defaultTickData = { actionsCount: 0, hotkeysCount: 0 };
+const defaultTickData = { inputsCount: 0, hotkeysCount: 0 };
 let eventCounterTicks = [...Array(TICK_INTERVAL_SIZE_S).fill({ ...defaultTickData })];
 
 setInterval(() => {
-  eventCounterTicks = [{ ...defaultTickData }, ...eventCounterTicks.slice(0, -1)];
-
-  const { actionsSum, hotkeysSum } = eventCounterTicks
-    .reduce((sum, { actionsCount, hotkeysCount }) => {
-      sum['actionsSum'] += actionsCount;
+  const { inputsSum, hotkeysSum } = eventCounterTicks.slice(0, FIRST_THREE_ITEMS)
+    .reduce((sum, { inputsCount, hotkeysCount }) => {
+      sum['inputsSum'] += inputsCount;
       sum['hotkeysSum'] += hotkeysCount;
       return sum;
-    }, { actionsSum: 0, hotkeysSum: 0 });
+    }, { inputsSum: 0, hotkeysSum: 0 });
 
-  // TODO: Figure out how to calculate IPS and HKPS
-  const inputsPerMinute = Math.round((actionsSum / TICK_INTERVAL_SIZE_S) * 60);
-  const hotkeysPerMinute = Math.round((hotkeysSum / TICK_INTERVAL_SIZE_S) * 60);
+  const inputsPerMinute = Math.round((inputsSum / FIRST_THREE_ITEMS) * 20);
+  const hotkeysPerMinute = Math.round((hotkeysSum / FIRST_THREE_ITEMS) * 20);
 
   io.emit('STATS_TICK', { eventCounterTicks, inputsPerMinute, hotkeysPerMinute })
+
+  eventCounterTicks = [{ ...defaultTickData }, ...eventCounterTicks.slice(0, -1)];
 }, TICK_RATE_MS)
 
 const handleKeyEvent = (event, activeKeyMapping) => {
+  const app = activeWindow.sync().owner.name;
+
+  const isAppNotSupported = config.find(supportedApp => supportedApp === app) === null;
+
+  if (isAppNotSupported) return;
+
   processKeyEvent({
     io,
     event: {
@@ -74,7 +80,7 @@ const handleKeyEvent = (event, activeKeyMapping) => {
       displayName: macKeycodeToDisplayNameMapping[event.rawKey._nameRaw] || event.name,
       state: event.state
     },
-    app: activeWindow.sync().owner.name,
+    app,
     timestamp: Date.now(),
     activeKeyMapping,
     config,

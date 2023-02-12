@@ -64,7 +64,7 @@ const processKeyEvent = ({
     activeKeyMapping,
   }
 
-  eventCounterTicks[0].actionsCount += 1;
+  eventCounterTicks[0].inputsCount += 1;
   io.emit('KEY_EVENT', payload);
 
   const keyCombination = getKeyCombination({

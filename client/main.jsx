@@ -22,7 +22,7 @@ const App = () => {
   const [activeKeyMapping, setActiveKeyMapping] = useState({});
   const [lastKeyPressed, setLastKeyPressed] = useState(null);
   const [hotkeyHistory, setHotkeyHistory] = useState([]);
-  const [stats, setStats] = useState({});
+  const [stats, setStats] = useState(null);
   const [app, setApp] = useState(null);
 
   const handleSocketConnect = () => {
@@ -65,7 +65,7 @@ const App = () => {
   }
 
   const handleStatsTick = ({ inputsPerMinute, hotkeysPerMinute, eventCounterTicks }) => {
-    setStats({ inputsPerMinute, hotkeysPerMinute });
+    setStats({ inputsPerMinute, hotkeysPerMinute, eventCounterTicks });
   }
 
   const handleSocketDisconnect = () => {}
@@ -90,6 +90,9 @@ const App = () => {
 
   const activeKeys = getActiveKeysByMapping(activeKeyMapping);
 
+  const inputsCountDataArray = stats?.eventCounterTicks?.map(({ inputsCount }) => inputsCount) || []
+  const hotkeysCountDataArray = stats?.eventCounterTicks?.map(({ hotkeysCount }) => hotkeysCount) || []
+
   if (isConnected) {
     return (
       <div className="app-container">
@@ -100,7 +103,6 @@ const App = () => {
             </div>
           ))}
         </pre>
-        <pre className="stats">{JSON.stringify(stats, null, 2)}</pre>
         <div className="keycaps">
           <div className={`keycap ${activeKeyMapping['LEFT SHIFT'] && 'down'}`}>SHIFT</div>
           <div className={`keycap ${activeKeyMapping['LEFT CTRL'] && 'down'}`}>CTRL</div>
@@ -109,6 +111,23 @@ const App = () => {
           <div className="keycap last-key-pressed">{lastKeyPressed || '-'}</div>
         </div>
         <div className="appname-bar">{app || '---'}</div>
+        <div>
+          <pre className="stats">HKPM {stats?.hotkeysPerMinute}</pre>
+          <Chart
+            data={hotkeysCountDataArray}
+            width="100px"
+            height="100px"
+            lineColor="red"
+            maxValue={10}
+          />
+          <pre className="stats">IPM {stats?.inputsPerMinute}</pre>
+          <Chart
+            data={inputsCountDataArray}
+            width="100px"
+            height="100px"
+            lineColor="blue"
+          />
+        </div>
       </div>
     );
   }
@@ -117,5 +136,51 @@ const App = () => {
     <h4>Not connected to key server.</h4>
   );
 }
+
+const mapValue = (value, inputMin, inputMax, outputMin, outputMax) => {
+  return (value - inputMin) * (outputMax - outputMin) / (inputMax - inputMin) + outputMin;
+}
+
+const Chart = ({
+  data,
+  lineMargin = 10,
+  width,
+  height,
+  maxValue = 50,
+  axisColor = 'black',
+  lineColor = 'blue'
+}) => {
+  const intervalSize = data.length;
+
+  const line = data.map((value, index) => {
+    const pathCommand = index === 0 ? 'M' : 'L';
+
+    const mappedValue = (100 - mapValue(value, 0, maxValue, 0, 80)) - lineMargin;
+
+    return `${pathCommand} ${lineMargin + (index * ((100 - lineMargin) / intervalSize))} ${mappedValue}`
+  }).join(' ');
+
+  return (
+    <div style={{ width, height }}>
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M 0 0 v 100 h 100"
+          stroke={axisColor}
+          stroke-width="4"
+          fill="transparent"
+          stroke-linejoin="round"
+        />
+        <path
+          d={line}
+          stroke={lineColor}
+          stroke-width="2"
+          fill="transparent"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </div>
+  );
+}
+
 
 ReactDOM.render(<App />, document.getElementById("root"));
