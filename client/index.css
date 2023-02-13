@@ -1,17 +1,145 @@
+:root {
+  --primary: white;
+  --secondary: black;
+  --spacing: 10px;
+  --spacing-s: 5px;
+  --app-width: 500px;
+  --border: 2px solid var(--primary);
+  --border-radius: 5px;
+}
+
+body {
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--primary);
+  opacity: 0.98;
+}
+
 .app {
   font-size: 1.5em;
 }
 
+.app-container {
+  display: grid;
+  grid-template-areas:
+    'hotkeys hotkeys hotkeys hotkeys stats'
+    'keycaps keycaps keycaps keycaps stats'
+    'keycaps keycaps keycaps keycaps stats'
+    'appname appname appname appname appname';
+  gap: var(--spacing-s);
+}
+
 .keycaps {
+  grid-area: keycaps;
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: var(--spacing-s);
+}
+
+.top-row {
+  display: flex;
+  gap: var(--spacing-s);
+}
+
+.bottom-row {
+  display: flex;
+  gap: var(--spacing-s);
 }
 
 .keycap {
-  font-size: 2em;
+  font-size: 1.5em;
+  font-weight: bold;
+  border-radius: var(--border-radius);
+  background-color: var(--secondary);
+  display: inline-block;
+  padding: var(--spacing);
+  transition: 100ms ease-out all;
 }
 
+.keycap-shift {
+  width: 50%;
+}
+
+.keycap-ctrl {
+  width: 33%;
+}
+
+.keycap-alt {
+  width: 33%;
+}
+
+.keycap-cmd {
+  width: 33%;
+}
+
+.last-key-pressed {
+  width: 50%;
+  background-color: var(--primary);
+  border: 2px solid var(--secondary);
+  color: var(--secondary);
+  overflow: hidden;
+  max-height: 42px;
+  display: flex;
+  font-size: 1.5em;
+  font-weight: bold;
+  justify-content: center;
+  align-items: center;
+}
+
+
 .down {
-  color: white;
-  background-color: black;
+  color: var(--secondary);
+  background-color: var(--primary);
+}
+
+.hotkey-history {
+  grid-area: hotkeys;
+  border-radius: var(--border-radius);
+  background-color: var(--secondary);
+  padding: var(--spacing);
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.hotkey {
+  min-width: 400px;
+  font-size: 0.9em;
+  font-weight: bold;
+  margin-bottom: var(--spacing-s);
+}
+
+.hotkey-combo, .hotkey-count {
+  background-color: var(--primary);
+  color: var(--secondary);
+  padding: 0 var(--spacing-s);
+  border-radius: var(--border-radius);
+}
+
+.appname-bar {
+  grid-area: appname;
+  border-radius: var(--border-radius);
+  background-color: var(--secondary);
+  padding: var(--spacing);
+}
+
+.stats {
+  grid-area: stats;
+  border-radius: var(--border-radius);
+  background-color: var(--secondary);
+  padding: var(--spacing);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing);
+  font-weight: bold;
+  justify-content: center;
+}
+
+.chart-axis {
+  stroke: var(--primary);
+}
+
+.chart-line {
+  stroke: var(--primary);
 }

@@ -56,8 +56,11 @@ const App = () => {
 
       const updatedHistory = [{ keys, desc, count: 0 }, ...currentHotkeyHistory];
 
-      if (updatedHistory.length > 3) {
-        return [updatedHistory[0], updatedHistory[1], updatedHistory[2]];
+      if (updatedHistory.length > 2) {
+        return [
+          updatedHistory[0],
+          updatedHistory[1]
+        ];
       }
 
       return updatedHistory;
@@ -96,35 +99,39 @@ const App = () => {
   if (isConnected) {
     return (
       <div className="app-container">
-        <pre className="hotkey-history">
+        <div className="hotkey-history">
           {hotkeyHistory.map(({ keys, desc, count }) => (
             <div className="hotkey">
-              {keys} : {desc} ({count})
+              <span className="hotkey-combo">{keys}</span> {desc} <span className="hotkey-count">{count}</span>
             </div>
           ))}
-        </pre>
+        </div>
         <div className="keycaps">
-          <div className={`keycap ${activeKeyMapping['LEFT SHIFT'] && 'down'}`}>SHIFT</div>
-          <div className={`keycap ${activeKeyMapping['LEFT CTRL'] && 'down'}`}>CTRL</div>
-          <div className={`keycap ${activeKeyMapping['LEFT ALT'] && 'down'}`}>ALT</div>
-          <div className={`keycap ${activeKeyMapping['LEFT META'] && 'down'}`}>CMD</div>
-          <div className="keycap last-key-pressed">{lastKeyPressed || '-'}</div>
+          <div className="top-row">
+            <div className={`keycap keycap-shift ${activeKeyMapping['LEFT SHIFT'] && 'down'}`}>SHIFT</div>
+            <div className="keycap last-key-pressed">{lastKeyPressed || '-'}</div>
+          </div>
+          <div className="bottom-row">
+            <div className={`keycap keycap-ctrl ${activeKeyMapping['LEFT CTRL'] && 'down'}`}>CTRL</div>
+            <div className={`keycap keycap-alt ${activeKeyMapping['LEFT ALT'] && 'down'}`}>ALT</div>
+            <div className={`keycap keycap-cmd ${activeKeyMapping['LEFT META'] && 'down'}`}>CMD</div>
+          </div>
         </div>
         <div className="appname-bar">{app || '---'}</div>
-        <div>
-          <pre className="stats">HKPM {stats?.hotkeysPerMinute}</pre>
+        <div className="stats">
+          <div>HKPM {stats?.hotkeysPerMinute}</div>
           <Chart
             data={hotkeysCountDataArray}
-            width="100px"
-            height="100px"
+            width="50px"
+            height="50px"
             lineColor="red"
             maxValue={10}
           />
-          <pre className="stats">IPM {stats?.inputsPerMinute}</pre>
+          <div>IPM {stats?.inputsPerMinute}</div>
           <Chart
             data={inputsCountDataArray}
-            width="100px"
-            height="100px"
+            width="50px"
+            height="50px"
             lineColor="blue"
           />
         </div>
@@ -164,16 +171,16 @@ const Chart = ({
     <div style={{ width, height }}>
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <path
+          className="chart-axis"
           d="M 0 0 v 100 h 100"
-          stroke={axisColor}
-          stroke-width="4"
+          stroke-width="3"
           fill="transparent"
           stroke-linejoin="round"
         />
         <path
+          className="chart-line"
           d={line}
-          stroke={lineColor}
-          stroke-width="2"
+          stroke-width="3"
           fill="transparent"
           stroke-linejoin="round"
         />
